@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 
 from flask import Flask, request, make_response
 from flask_migrate import Migrate
@@ -30,6 +30,8 @@ class Home(Resource):
         )
 
         return response
+    
+  
 
 api.add_resource(Home, '/')
 
@@ -45,7 +47,7 @@ class Newsletters(Resource):
         )
 
         return response
-
+    
     def post(self):
         
         new_record = Newsletter(
@@ -79,6 +81,35 @@ class NewsletterByID(Resource):
         )
 
         return response
+    
+    def patch(self,id):
+        record = Newsletter.query.filter(Newsletter.id == id).first()
+        for attr in request.form:
+            setattr(record, attr, request.form[attr])
+
+        db.session.add(record)
+        db.session.commit()
+
+        response_dict = record.to_dict()
+        response = make_response(
+            response_dict,
+            200,
+        )
+        return response
+    
+    def delete(self, id):
+        record = Newsletter.query.filter(Newsletter.id == id).first()
+        db.session.delete(record)
+        db.session.commit()
+
+        response_dict = ("message": "record has been deleted")
+        response = make_response(
+            response_dict,
+            200
+        )
+        return response
+
+
 
 api.add_resource(NewsletterByID, '/newsletters/<int:id>')
 
